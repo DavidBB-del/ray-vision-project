@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+
+node_modules/
+dist/
+.vite/
+unpackage/
+
+uploads/
+outputs/
+*.log
+
+# Local model weights are usually large and should not be committed.
+backend/weights/*.pth
+backend/weights/*.pt
+backend/weights/*.ckpt
+backend/weights/*.safetensors
+!backend/weights/REDCNN_100000iter.ckpt

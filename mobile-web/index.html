@@ -1,0 +1,1067 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>锐影智建 Ray-Vision</title>
+    <style>
+      :root {
+        --ink: #0f172a;
+        --muted: #4b647a;
+        --line: rgba(219, 232, 242, 0.72);
+        --blue: #2563eb;
+        --cyan: #0ea5e9;
+        --teal: #14b8a6;
+        --bg: #f6f8fb;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        position: relative;
+        min-height: 100vh;
+        margin: 0;
+        color: var(--ink);
+        background:
+          linear-gradient(90deg, rgba(239, 248, 252, 0.92) 0%, rgba(239, 248, 252, 0.64) 43%, rgba(15, 71, 96, 0.22) 100%),
+          url("./assets/clinical-dna-bg.png") center / cover fixed no-repeat;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      }
+
+      body::before {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.84), transparent 32%),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.28), rgba(226, 246, 252, 0.5));
+        content: "";
+      }
+
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+
+      .app {
+        position: relative;
+        z-index: 1;
+        width: min(1120px, 100%);
+        min-height: 100vh;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 24px;
+        padding: 12px 14px;
+        border: 1px solid rgba(255, 255, 255, 0.74);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.62);
+        box-shadow: 0 18px 45px rgba(15, 71, 96, 0.1);
+        backdrop-filter: blur(22px);
+      }
+
+      .brand-mark {
+        position: relative;
+        display: flex;
+        width: 58px;
+        height: 58px;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        place-items: center;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.82);
+        border-radius: 18px;
+        background:
+          radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0) 28%),
+          linear-gradient(135deg, #0f8edb 0%, #2563eb 50%, #14b8a6 100%);
+        color: #fff;
+        font-weight: 900;
+        box-shadow: 0 18px 36px rgba(14, 165, 233, 0.28);
+      }
+
+      .brand-mark::after {
+        position: absolute;
+        inset: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.38);
+        border-radius: 14px;
+        content: "";
+      }
+
+      .brand-logo {
+        position: relative;
+        z-index: 1;
+        width: 44px;
+        height: 44px;
+      }
+
+      .brand-name {
+        margin: 0;
+        font-size: 20px;
+        font-weight: 800;
+      }
+
+      .brand-subtitle {
+        margin: 3px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .pill {
+        margin-left: auto;
+        padding: 8px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.78);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.62);
+        color: #31556b;
+        font-size: 12px;
+        font-weight: 700;
+        backdrop-filter: blur(12px);
+      }
+
+      .section-head {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 14px;
+        margin: 8px 0 14px;
+      }
+
+      .kicker {
+        color: var(--cyan);
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2 {
+        margin: 4px 0 0;
+      }
+
+      h1 {
+        font-size: clamp(26px, 7vw, 38px);
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      .task-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .task {
+        min-height: 160px;
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.76);
+        border-radius: 16px;
+        background: rgba(255, 255, 255, 0.68);
+        text-align: left;
+        box-shadow: 0 12px 30px rgba(15, 71, 96, 0.08);
+        backdrop-filter: blur(18px);
+      }
+
+      .task.active {
+        border-color: rgba(14, 165, 233, 0.82);
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 18px 42px rgba(37, 99, 235, 0.16);
+      }
+
+      .task-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
+      .task-icon {
+        display: grid;
+        width: 42px;
+        height: 42px;
+        place-items: center;
+        border-radius: 12px;
+        background: rgba(224, 242, 254, 0.78);
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      .metric {
+        max-width: 95px;
+        overflow: hidden;
+        padding: 5px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .task-title {
+        display: block;
+        margin-top: 22px;
+        font-size: 17px;
+        font-weight: 800;
+      }
+
+      .task-subtitle,
+      .task-en,
+      .copy {
+        color: var(--muted);
+      }
+
+      .task-subtitle {
+        display: block;
+        margin-top: 6px;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .task-en {
+        display: block;
+        margin-top: 14px;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .panel {
+        padding: 18px;
+        border: 1px solid rgba(255, 255, 255, 0.76);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.68);
+        box-shadow: 0 18px 45px rgba(15, 71, 96, 0.1);
+        backdrop-filter: blur(24px);
+      }
+
+      .upload {
+        display: flex;
+        min-height: 220px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        margin-top: 16px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        background: rgba(248, 250, 252, 0.66);
+        color: var(--cyan);
+      }
+
+      .upload-icon {
+        display: grid;
+        width: 58px;
+        height: 58px;
+        place-items: center;
+        border-radius: 16px;
+        background: #e0f2fe;
+        font-size: 34px;
+        font-weight: 300;
+      }
+
+      .file-name {
+        max-width: 100%;
+        margin-top: 14px;
+        overflow: hidden;
+        color: var(--ink);
+        font-weight: 800;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .control {
+        margin-top: 14px;
+        padding: 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.78);
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+
+      .value {
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin-top: 12px;
+        accent-color: var(--blue);
+      }
+
+      select,
+      input[type="text"] {
+        width: 100%;
+        height: 42px;
+        margin-top: 12px;
+        padding: 0 12px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+      }
+
+      .hint {
+        display: block;
+        margin-top: 8px;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+      }
+
+      .primary {
+        width: 100%;
+        height: 46px;
+        margin-top: 16px;
+        border: 0;
+        border-radius: 10px;
+        background: var(--blue);
+        color: #fff;
+        font-weight: 900;
+        box-shadow: 0 16px 34px rgba(37, 99, 235, 0.18);
+      }
+
+      .primary:disabled {
+        background: #cbd5e1;
+        box-shadow: none;
+      }
+
+      .progress-track {
+        height: 8px;
+        margin-top: 12px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: #e2e8f0;
+      }
+
+      .progress-fill {
+        height: 100%;
+        width: 0;
+        border-radius: 999px;
+        background: linear-gradient(90deg, var(--teal), var(--cyan), var(--blue));
+        transition: width 0.28s ease;
+      }
+
+      .result {
+        margin-top: 16px;
+      }
+
+      .viewer {
+        position: relative;
+        min-height: 280px;
+        margin-top: 16px;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #020617;
+        touch-action: none;
+      }
+
+      .viewer img,
+      .after {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .viewer img {
+        object-fit: contain;
+        user-select: none;
+      }
+
+      .after {
+        overflow: hidden;
+        width: 50%;
+      }
+
+      .after img {
+        width: var(--viewer-width, 100%);
+        max-width: none;
+      }
+
+      .divider {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 2px;
+        height: 100%;
+        background: #fff;
+        transform: translateX(-1px);
+      }
+
+      .handle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: grid;
+        width: 48px;
+        height: 48px;
+        place-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 999px;
+        background: #fff;
+        color: var(--blue);
+        font-weight: 900;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+      }
+
+      .label {
+        position: absolute;
+        top: 12px;
+        z-index: 3;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: rgba(15, 23, 42, 0.72);
+        color: #fff;
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      .label.left {
+        left: 12px;
+      }
+
+      .label.right {
+        right: 12px;
+      }
+
+      .placeholder {
+        display: grid;
+        min-height: 280px;
+        place-items: center;
+        margin-top: 16px;
+        border: 2px dashed #cbd5e1;
+        border-radius: 12px;
+        background: rgba(248, 250, 252, 0.76);
+        color: var(--muted);
+        text-align: center;
+      }
+
+      .download {
+        width: auto;
+        min-width: 96px;
+        height: 38px;
+        margin: 0;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: #fff;
+        color: var(--blue);
+        font-weight: 900;
+      }
+
+      .hidden {
+        display: none;
+      }
+
+      @media (max-width: 760px) {
+        .app {
+          padding: 18px 14px;
+        }
+
+        .task-grid,
+        .grid {
+          grid-template-columns: 1fr;
+        }
+
+        .task-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          gap: 10px;
+        }
+
+        .task {
+          min-height: 150px;
+          padding: 14px;
+        }
+
+        .metric {
+          display: none;
+        }
+
+        .viewer,
+        .placeholder {
+          min-height: 300px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="app">
+      <header class="header">
+        <div class="brand-mark" aria-label="Ray-Vision logo">
+          <svg class="brand-logo" viewBox="0 0 64 64" role="img" aria-hidden="true">
+            <defs>
+              <linearGradient id="logoStroke" x1="8" y1="8" x2="56" y2="56">
+                <stop offset="0" stop-color="#ffffff" />
+                <stop offset="0.52" stop-color="#dff8ff" />
+                <stop offset="1" stop-color="#bff7eb" />
+              </linearGradient>
+            </defs>
+            <circle cx="32" cy="32" r="22" fill="rgba(255,255,255,0.12)" />
+            <path
+              d="M13 33c6.4-9.2 14-13.8 22.8-13.8 5.7 0 10.8 1.9 15.2 5.7M51 31c-6.4 9.2-14 13.8-22.8 13.8-5.7 0-10.8-1.9-15.2-5.7"
+              fill="none"
+              stroke="url(#logoStroke)"
+              stroke-linecap="round"
+              stroke-width="4"
+            />
+            <circle cx="32" cy="32" r="8" fill="rgba(255,255,255,0.92)" />
+            <path d="M32 23v18M23 32h18" stroke="#2563eb" stroke-linecap="round" stroke-width="3" />
+            <path d="M50 13v8M46 17h8" stroke="#ffffff" stroke-linecap="round" stroke-width="2.4" />
+          </svg>
+        </div>
+        <div>
+          <p class="brand-name">锐影智建</p>
+          <p class="brand-subtitle">Ray-Vision Medical Reconstruction</p>
+        </div>
+        <span class="pill">Mobile Web</span>
+      </header>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <div class="kicker">Dashboard</div>
+            <h1>医学图像智能重建</h1>
+          </div>
+        </div>
+
+        <div class="task-grid" id="tasks"></div>
+      </section>
+
+      <section class="grid">
+        <div class="panel">
+          <div class="kicker">Workspace</div>
+          <h2 id="workspaceTitle">CT 图像重建</h2>
+
+          <label class="upload">
+            <input id="fileInput" class="hidden" type="file" accept="image/png,image/jpeg,.npy" />
+            <span class="upload-icon">+</span>
+            <span class="file-name" id="fileName">选择医学影像</span>
+            <span class="copy">PNG / JPEG / NPY · NPY 按 RED-CNN 原流程</span>
+          </label>
+
+          <div class="control">
+            <div class="control-row">
+              <strong id="statusText">等待输入</strong>
+              <span class="value" id="progressText">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="kicker">Parameters</div>
+          <h2>算法参数</h2>
+
+          <div class="control">
+            <div class="control-row">
+              <strong>Iterations</strong>
+              <span class="value" id="iterationsValue">12</span>
+            </div>
+            <input id="iterations" type="range" min="1" max="64" value="12" />
+          </div>
+
+          <div class="control">
+            <div class="control-row">
+              <strong>Denoise</strong>
+              <span class="value" id="denoiseValue">0.45</span>
+            </div>
+            <input id="denoise" type="range" min="0" max="1" step="0.05" value="0.45" />
+          </div>
+
+          <div class="control">
+            <div class="control-row">
+              <strong>Upscale</strong>
+              <span class="value" id="upscaleValue">2x</span>
+            </div>
+            <select id="upscale">
+              <option value="1">1x</option>
+              <option value="2" selected>2x</option>
+              <option value="4">4x</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <div class="control-row">
+              <strong>RED-CNN 后端地址</strong>
+              <span class="value" id="apiStatus">未设置</span>
+            </div>
+            <input
+              id="apiBaseUrl"
+              type="text"
+              placeholder="例如：https://your-api.example.com"
+              autocomplete="off"
+            />
+            <span class="hint">公网页面重建 .npy 时必须填写可访问的 FastAPI 后端地址。</span>
+          </div>
+
+          <button class="primary" id="runBtn" disabled>启动重建</button>
+        </div>
+      </section>
+
+      <section class="panel result">
+        <div class="section-head">
+          <div>
+            <div class="kicker">Result Viewer</div>
+            <h2>Before / After 结果对比</h2>
+          </div>
+          <button class="download" id="downloadBtn" disabled>下载</button>
+        </div>
+
+        <div id="placeholder" class="placeholder">
+          <div>
+            <strong>等待重建结果</strong>
+            <p class="copy">上传图像后即可拖动滑块查看细节差异</p>
+          </div>
+        </div>
+
+        <div id="viewer" class="viewer hidden">
+          <img id="beforeImg" alt="Input image" />
+          <div class="after" id="afterLayer">
+            <img id="afterImg" alt="Reconstructed image" />
+          </div>
+          <span class="label left">Input</span>
+          <span class="label right">Reconstructed</span>
+          <div class="divider" id="divider"></div>
+          <div class="handle" id="handle">↔</div>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      const tasks = [
+        ["low-dose-ct", "CT", "CT 图像重建", "低剂量 CT 至常规剂量 CT", "Low-dose CT to Normal CT", "Noise-aware"],
+        ["cbct", "CB", "CBCT 图像重建", "锥形束 CT 伪影校正", "Cone-Beam CT Reconstruction", "Artifact"],
+        ["mr-to-ct", "MR", "MR 合成 CT", "MR 到 CT 的跨模态合成", "MR to CT Synthesis", "Cross-modal"],
+        ["super-resolution", "SR", "医学图像超分", "低分辨率影像细节增强", "Super-Resolution", "2x / 4x"],
+      ];
+
+      const state = {
+        task: "low-dose-ct",
+        file: null,
+        fileKind: "image",
+        beforeUrl: "",
+        afterUrl: "",
+        progressTimer: null,
+        apiBaseUrl: localStorage.getItem("rayVisionApiBaseUrl") || "",
+      };
+
+      const $ = (id) => document.getElementById(id);
+      const taskRoot = $("tasks");
+      const fileInput = $("fileInput");
+      const runBtn = $("runBtn");
+      const downloadBtn = $("downloadBtn");
+      const viewer = $("viewer");
+      const placeholder = $("placeholder");
+      const beforeImg = $("beforeImg");
+      const afterImg = $("afterImg");
+      const afterLayer = $("afterLayer");
+      const divider = $("divider");
+      const handle = $("handle");
+
+      function renderTasks() {
+        taskRoot.innerHTML = "";
+        tasks.forEach(([key, short, title, subtitle, english, metric]) => {
+          const button = document.createElement("button");
+          button.className = `task ${state.task === key ? "active" : ""}`;
+          button.innerHTML = `
+            <span class="task-top">
+              <span class="task-icon">${short}</span>
+              <span class="metric">${metric}</span>
+            </span>
+            <span class="task-title">${title}</span>
+            <span class="task-subtitle">${subtitle}</span>
+            <span class="task-en">${english}</span>
+          `;
+          button.onclick = () => {
+            state.task = key;
+            $("workspaceTitle").textContent = title;
+            renderTasks();
+          };
+          taskRoot.appendChild(button);
+        });
+      }
+
+      function setProgress(value, text) {
+        $("progressText").textContent = `${value}%`;
+        $("progressFill").style.width = `${value}%`;
+        if (text) $("statusText").textContent = text;
+      }
+
+      function syncControls() {
+        $("iterationsValue").textContent = $("iterations").value;
+        $("denoiseValue").textContent = Number($("denoise").value).toFixed(2);
+        $("upscaleValue").textContent = `${$("upscale").value}x`;
+      }
+
+      function normalizeApiBaseUrl(value) {
+        return value.trim().replace(/\/+$/, "");
+      }
+
+      function syncApiBaseUrl() {
+        const input = $("apiBaseUrl");
+        state.apiBaseUrl = normalizeApiBaseUrl(input.value);
+        if (state.apiBaseUrl) {
+          localStorage.setItem("rayVisionApiBaseUrl", state.apiBaseUrl);
+          $("apiStatus").textContent = "已设置";
+        } else {
+          localStorage.removeItem("rayVisionApiBaseUrl");
+          $("apiStatus").textContent = "未设置";
+        }
+      }
+
+      function isNpyFile(file) {
+        return file && file.name.toLowerCase().endsWith(".npy");
+      }
+
+      function parseNpyHeader(header) {
+        const descr = /'descr':\s*'([^']+)'/.exec(header)?.[1] || /"descr":\s*"([^"]+)"/.exec(header)?.[1];
+        const fortranOrderText =
+          /'fortran_order':\s*(False|True)/.exec(header)?.[1] ||
+          /"fortran_order":\s*(false|true)/i.exec(header)?.[1];
+        const shapeText = /'shape':\s*\(([^)]*)\)/.exec(header)?.[1] || /"shape":\s*\[([^\]]*)\]/.exec(header)?.[1];
+        if (!descr || !fortranOrderText || !shapeText) {
+          throw new Error("无法解析 .npy 文件头");
+        }
+
+        const shape = shapeText
+          .split(",")
+          .map((item) => item.trim())
+          .filter(Boolean)
+          .map(Number);
+
+        return {
+          descr,
+          fortranOrder: /true/i.test(fortranOrderText),
+          shape,
+        };
+      }
+
+      function readNpyData(buffer) {
+        const bytes = new Uint8Array(buffer);
+        if (bytes[0] !== 0x93 || String.fromCharCode(...bytes.slice(1, 6)) !== "NUMPY") {
+          throw new Error("这不是有效的 .npy 文件");
+        }
+
+        const major = bytes[6];
+        const view = new DataView(buffer);
+        const headerLength = major <= 1 ? view.getUint16(8, true) : view.getUint32(8, true);
+        const headerOffset = major <= 1 ? 10 : 12;
+        const dataOffset = headerOffset + headerLength;
+        const header = new TextDecoder("latin1").decode(bytes.slice(headerOffset, dataOffset));
+        const meta = parseNpyHeader(header);
+        if (meta.fortranOrder) {
+          throw new Error("暂不支持 Fortran-order .npy，请保存为 C-order 数组");
+        }
+
+        const count = meta.shape.reduce((total, size) => total * size, 1);
+        const dataView = new DataView(buffer, dataOffset);
+        const data = new Float32Array(count);
+
+        const readers = {
+          "<f4": (offset) => dataView.getFloat32(offset, true),
+          "|f4": (offset) => dataView.getFloat32(offset, true),
+          "<f8": (offset) => dataView.getFloat64(offset, true),
+          "|u1": (offset) => dataView.getUint8(offset),
+          "<u2": (offset) => dataView.getUint16(offset, true),
+          "<i2": (offset) => dataView.getInt16(offset, true),
+          "<u4": (offset) => dataView.getUint32(offset, true),
+          "<i4": (offset) => dataView.getInt32(offset, true),
+        };
+        const sizes = {
+          "<f4": 4,
+          "|f4": 4,
+          "<f8": 8,
+          "|u1": 1,
+          "<u2": 2,
+          "<i2": 2,
+          "<u4": 4,
+          "<i4": 4,
+        };
+        const read = readers[meta.descr];
+        const elementSize = sizes[meta.descr];
+        if (!read || !elementSize) {
+          throw new Error(`暂不支持的 .npy dtype：${meta.descr}`);
+        }
+
+        for (let index = 0; index < count; index += 1) {
+          data[index] = read(index * elementSize);
+        }
+
+        let shape = meta.shape.filter((size) => size !== 1);
+        if (shape.length !== 2) {
+          throw new Error(`RED-CNN 需要 2D slice，当前 shape 是 (${meta.shape.join(", ")})`);
+        }
+
+        return {
+          data,
+          height: shape[0],
+          width: shape[1],
+        };
+      }
+
+      function renderRedcnnNpyPreview(npy) {
+        const minHU = -1024;
+        const maxHU = 3072;
+        const truncMin = -160;
+        const truncMax = 240;
+        const canvas = document.createElement("canvas");
+        canvas.width = npy.width;
+        canvas.height = npy.height;
+        const ctx = canvas.getContext("2d");
+        const imageData = ctx.createImageData(npy.width, npy.height);
+
+        for (let index = 0; index < npy.data.length; index += 1) {
+          const hu = npy.data[index] * (maxHU - minHU) + minHU;
+          const clipped = Math.min(truncMax, Math.max(truncMin, hu));
+          const gray = Math.round(((clipped - truncMin) / (truncMax - truncMin)) * 255);
+          const offset = index * 4;
+          imageData.data[offset] = gray;
+          imageData.data[offset + 1] = gray;
+          imageData.data[offset + 2] = gray;
+          imageData.data[offset + 3] = 255;
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+        return canvas.toDataURL("image/png");
+      }
+
+      async function createBeforePreview(file) {
+        if (!isNpyFile(file)) {
+          return URL.createObjectURL(file);
+        }
+
+        const buffer = await file.arrayBuffer();
+        const npy = readNpyData(buffer);
+        return renderRedcnnNpyPreview(npy);
+      }
+
+      function setComparison(percent) {
+        const next = Math.max(0, Math.min(100, percent));
+        afterLayer.style.width = `${next}%`;
+        divider.style.left = `${next}%`;
+        handle.style.left = `${next}%`;
+      }
+
+      function processLocally(file) {
+        if (isNpyFile(file)) {
+          return Promise.reject(new Error(".npy 需要连接本机 FastAPI 后端运行 RED-CNN。请先启动 http://127.0.0.1:8000。"));
+        }
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => {
+            const scale = state.task === "super-resolution" ? Number($("upscale").value) : 1;
+            const canvas = document.createElement("canvas");
+            canvas.width = image.naturalWidth * scale;
+            canvas.height = image.naturalHeight * scale;
+            const ctx = canvas.getContext("2d");
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+            const strength = Number($("denoise").value);
+
+            const base = document.createElement("canvas");
+            base.width = canvas.width;
+            base.height = canvas.height;
+            const baseCtx = base.getContext("2d");
+            baseCtx.imageSmoothingEnabled = true;
+            baseCtx.imageSmoothingQuality = "high";
+            baseCtx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+            const blurRadius = state.task === "low-dose-ct" ? 0.8 + strength * 2.4 : 0.3 + strength;
+            ctx.filter = `grayscale(100%) blur(${blurRadius}px) contrast(${108 + strength * 18}%) brightness(103%)`;
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+            ctx.filter = "none";
+
+            // Blend a little original detail back so the result looks denoised rather than simply blurred.
+            ctx.globalAlpha = state.task === "low-dose-ct" ? 0.18 : 0.28;
+            ctx.drawImage(base, 0, 0);
+            ctx.globalAlpha = 1;
+
+            if (state.task === "super-resolution") {
+              ctx.filter = "contrast(116%)";
+              ctx.drawImage(canvas, 0, 0);
+              ctx.filter = "none";
+            }
+            resolve(canvas.toDataURL("image/png"));
+          };
+          image.onerror = reject;
+          image.src = URL.createObjectURL(file);
+        });
+      }
+
+      function canUseLocalBackend() {
+        const host = location.hostname;
+        return (
+          Boolean(state.apiBaseUrl) ||
+          location.protocol === "file:" ||
+          host === "localhost" ||
+          host === "127.0.0.1" ||
+          /^10\./.test(host) ||
+          /^192\.168\./.test(host) ||
+          /^172\.(1[6-9]|2\d|3[0-1])\./.test(host)
+        );
+      }
+
+      async function processWithBackend(file) {
+        const payload = new FormData();
+        payload.append("file", file);
+        payload.append("iterations", $("iterations").value);
+        payload.append("denoise_strength", $("denoise").value);
+        payload.append("upscale_factor", $("upscale").value);
+
+        const backendBaseUrl =
+          state.apiBaseUrl ||
+          `http://${location.protocol === "file:" ? "127.0.0.1" : location.hostname}:8000`;
+        const response = await fetch(`${backendBaseUrl}/api/reconstruct/${state.task}`, {
+          method: "POST",
+          body: payload,
+        });
+        if (!response.ok) throw new Error(await response.text());
+        const blob = await response.blob();
+        return URL.createObjectURL(blob);
+      }
+
+      async function run() {
+        if (!state.file) return;
+        clearInterval(state.progressTimer);
+        setProgress(14, "正在进行前向推理");
+        runBtn.disabled = true;
+        state.progressTimer = setInterval(() => {
+          const current = parseInt($("progressText").textContent, 10) || 0;
+          setProgress(Math.min(92, current + Math.ceil(Math.random() * 8)));
+        }, 420);
+
+        try {
+          let resultUrl;
+          let engine = "本地演示";
+          if (isNpyFile(state.file) && !canUseLocalBackend()) {
+            throw new Error(".npy 严格按 RED-CNN 流程处理，需要公网或本机 FastAPI 后端；Netlify 静态页面无法直接运行 PyTorch。");
+          }
+
+          if (canUseLocalBackend()) {
+            try {
+              resultUrl = await processWithBackend(state.file);
+              engine = state.task === "low-dose-ct" ? "RED-CNN 推理" : "后端 Mock";
+            } catch (error) {
+              if (isNpyFile(state.file)) {
+                throw error;
+              }
+              resultUrl = await processLocally(state.file);
+            }
+          } else {
+            resultUrl = await processLocally(state.file);
+          }
+          state.afterUrl = resultUrl;
+          afterImg.src = resultUrl;
+          placeholder.classList.add("hidden");
+          viewer.classList.remove("hidden");
+          afterImg.onload = () => {
+            viewer.style.setProperty("--viewer-width", `${viewer.clientWidth}px`);
+            setComparison(50);
+          };
+          setProgress(100, `${engine}完成`);
+          downloadBtn.disabled = false;
+        } catch (error) {
+          setProgress(0, "任务异常");
+          alert(error.message || "处理失败");
+        } finally {
+          clearInterval(state.progressTimer);
+          runBtn.disabled = false;
+        }
+      }
+
+      fileInput.addEventListener("change", async () => {
+        const file = fileInput.files && fileInput.files[0];
+        if (!file) return;
+        state.file = file;
+        state.fileKind = isNpyFile(file) ? "npy" : "image";
+        if (state.beforeUrl) URL.revokeObjectURL(state.beforeUrl);
+        try {
+          state.beforeUrl = await createBeforePreview(file);
+          beforeImg.src = state.beforeUrl;
+          $("fileName").textContent = file.name;
+          runBtn.disabled = false;
+          downloadBtn.disabled = true;
+          viewer.classList.add("hidden");
+          placeholder.classList.remove("hidden");
+          setProgress(8, state.fileKind === "npy" ? "NPY 输入就绪" : "输入就绪");
+        } catch (error) {
+          state.file = null;
+          state.beforeUrl = "";
+          runBtn.disabled = true;
+          setProgress(0, "NPY 解析失败");
+          alert(error.message || ".npy 文件解析失败");
+        }
+      });
+
+      ["iterations", "denoise", "upscale"].forEach((id) => {
+        $(id).addEventListener("input", syncControls);
+        $(id).addEventListener("change", syncControls);
+      });
+
+      $("apiBaseUrl").value = state.apiBaseUrl;
+      $("apiBaseUrl").addEventListener("input", syncApiBaseUrl);
+      $("apiBaseUrl").addEventListener("change", syncApiBaseUrl);
+
+      runBtn.addEventListener("click", run);
+      downloadBtn.addEventListener("click", () => {
+        if (!state.afterUrl) return;
+        const link = document.createElement("a");
+        link.href = state.afterUrl;
+        link.download = `ray-vision-${state.task}.png`;
+        link.click();
+      });
+
+      function pointerToPercent(event) {
+        const rect = viewer.getBoundingClientRect();
+        return ((event.clientX - rect.left) / rect.width) * 100;
+      }
+
+      let dragging = false;
+      viewer.addEventListener("pointerdown", (event) => {
+        dragging = true;
+        viewer.setPointerCapture(event.pointerId);
+        setComparison(pointerToPercent(event));
+      });
+      viewer.addEventListener("pointermove", (event) => {
+        if (dragging) setComparison(pointerToPercent(event));
+      });
+      viewer.addEventListener("pointerup", (event) => {
+        dragging = false;
+        viewer.releasePointerCapture(event.pointerId);
+      });
+      window.addEventListener("resize", () => {
+        viewer.style.setProperty("--viewer-width", `${viewer.clientWidth}px`);
+      });
+
+      renderTasks();
+      syncControls();
+      syncApiBaseUrl();
+    </script>
+  </body>
+</html>

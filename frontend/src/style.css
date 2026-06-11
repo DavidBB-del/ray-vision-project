@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color: #0f172a;
+  background: #f6f8fb;
+  font-family:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "Microsoft YaHei", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+@layer components {
+  .app-shell {
+    @apply min-h-screen bg-[linear-gradient(180deg,#f8fafc_0%,#eef7fb_48%,#f8fafc_100%)];
+  }
+
+  .brand-mark {
+    @apply grid h-11 w-11 place-items-center rounded-lg bg-clinical-blue text-white shadow-panel;
+  }
+
+  .glass-panel {
+    @apply rounded-lg border border-white/80 bg-white/[0.78] shadow-soft backdrop-blur-xl;
+  }
+
+  .section-kicker {
+    @apply text-xs font-semibold uppercase text-clinical-cyan;
+  }
+
+  .panel-heading {
+    @apply flex items-start justify-between gap-4;
+  }
+
+  .panel-title {
+    @apply text-xl font-semibold text-clinical-ink;
+  }
+
+  .status-pill {
+    @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1.5 text-xs font-semibold text-clinical-muted shadow-sm;
+  }
+
+  .status-dot {
+    @apply h-2 w-2 rounded-full bg-clinical-teal shadow-[0_0_0_4px_rgba(20,184,166,0.12)];
+  }
+
+  .task-card {
+    @apply min-h-[214px] rounded-lg border border-slate-200 bg-white/[0.86] p-5 text-left shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-soft focus:outline-none focus:ring-2 focus:ring-clinical-cyan/40;
+  }
+
+  .task-card-active {
+    @apply border-clinical-cyan bg-white shadow-panel;
+  }
+
+  .task-icon {
+    @apply grid h-11 w-11 place-items-center rounded-lg bg-slate-50 text-clinical-blue;
+  }
+
+  .task-metric {
+    @apply rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-clinical-muted;
+  }
+
+  .task-accent-blue .task-icon {
+    @apply text-clinical-blue;
+  }
+
+  .task-accent-cyan .task-icon {
+    @apply text-clinical-cyan;
+  }
+
+  .task-accent-teal .task-icon {
+    @apply text-clinical-teal;
+  }
+
+  .task-accent-indigo .task-icon {
+    @apply text-indigo-500;
+  }
+
+  .module-chip {
+    @apply max-w-[14rem] truncate rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-clinical-muted;
+  }
+
+  .upload-zone {
+    @apply flex aspect-[16/9] w-full flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/70 p-6 text-clinical-cyan transition duration-200 hover:border-clinical-cyan hover:bg-cyan-50/50 focus:outline-none focus:ring-2 focus:ring-clinical-cyan/35;
+  }
+
+  .upload-zone-active {
+    @apply border-clinical-blue bg-blue-50 text-clinical-blue;
+  }
+
+  .progress-bar {
+    @apply h-full rounded-full bg-[linear-gradient(90deg,#14b8a6,#0ea5e9,#2563eb)] transition-all duration-500;
+  }
+
+  .control-row {
+    @apply block rounded-lg border border-slate-200 bg-white/70 p-4;
+  }
+
+  .control-label {
+    @apply text-sm font-semibold text-clinical-ink;
+  }
+
+  .control-value {
+    @apply ml-3 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-semibold text-clinical-muted;
+  }
+
+  .range-input {
+    @apply mt-4 h-2 w-full cursor-pointer appearance-none rounded-full bg-slate-200 accent-clinical-blue;
+  }
+
+  .select-input {
+    @apply mt-4 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-clinical-ink outline-none focus:border-clinical-cyan focus:ring-2 focus:ring-clinical-cyan/25;
+  }
+
+  .primary-action {
+    @apply inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-clinical-blue px-4 text-sm font-semibold text-white shadow-panel transition duration-200 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-clinical-blue/35 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none;
+  }
+
+  .icon-action {
+    @apply grid h-10 w-10 place-items-center rounded-lg border border-slate-200 bg-white text-clinical-muted transition duration-200 hover:border-clinical-cyan hover:text-clinical-blue focus:outline-none focus:ring-2 focus:ring-clinical-cyan/30 disabled:cursor-not-allowed disabled:opacity-45;
+  }
+
+  .result-placeholder {
+    @apply flex aspect-[16/9] min-h-[320px] flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50/70 text-clinical-cyan;
+  }
+
+  .comparison-wrap {
+    @apply w-full;
+  }
+
+  .comparison-frame {
+    @apply relative aspect-[16/9] min-h-[320px] cursor-ew-resize overflow-hidden rounded-lg border border-slate-200 bg-slate-950 shadow-soft select-none;
+    touch-action: none;
+  }
+
+  .comparison-image {
+    @apply h-full w-full object-contain;
+  }
+
+  .comparison-after {
+    @apply absolute inset-0 overflow-hidden;
+  }
+
+  .comparison-divider {
+    @apply absolute top-0 h-full w-px bg-white shadow-[0_0_0_1px_rgba(15,23,42,0.18)];
+  }
+
+  .comparison-handle {
+    @apply absolute left-1/2 top-1/2 grid h-12 w-12 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full border border-white/80 bg-white text-clinical-blue shadow-soft;
+  }
+
+  .comparison-label {
+    @apply absolute rounded-full bg-slate-950/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur;
+  }
+}

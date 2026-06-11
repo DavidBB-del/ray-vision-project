@@ -1,0 +1,22 @@
+{
+  "name": "ray-vision-miniapp",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev:mp-weixin": "uni -p mp-weixin",
+    "build:mp-weixin": "uni build -p mp-weixin"
+  },
+  "dependencies": {
+    "@dcloudio/uni-app": "latest",
+    "@dcloudio/uni-mp-weixin": "latest",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@dcloudio/types": "latest",
+    "@dcloudio/vite-plugin-uni": "latest",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.7",
+    "vue-tsc": "^2.2.0"
+  }
+}
