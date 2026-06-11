@@ -38,6 +38,8 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 WEIGHTS_DIR = BACKEND_DIR / "weights"
 REDCNN_WEIGHT_PATH = WEIGHTS_DIR / "REDCNN_100000iter.ckpt"
 MIN_REDCNN_SIZE = 32
+REDCNN_TILE_SIZE = 128
+REDCNN_TILE_OVERLAP = 24
 REDCNN_NORM_RANGE_MIN = -1024.0
 REDCNN_NORM_RANGE_MAX = 3072.0
 REDCNN_TRUNC_MIN = -160.0
@@ -159,13 +161,66 @@ def _redcnn_normalized_tensor_to_windowed_pil(
     return Image.fromarray(windowed, mode="L").convert("RGB")
 
 
+def _tile_starts(length: int, tile_size: int, step: int) -> list[int]:
+    if length <= tile_size:
+        return [0]
+
+    starts = list(range(0, max(1, length - tile_size + 1), step))
+    last = length - tile_size
+    if starts[-1] != last:
+        starts.append(last)
+    return starts
+
+
+def _run_redcnn_tensor(input_tensor: Any, model: Any) -> Any:
+    """Run RED-CNN with tiled inference to avoid CPU memory spikes.
+
+    The original RED-CNN preprocessing is unchanged. This only changes how a
+    large 2D slice is forwarded through the network, which is necessary for
+    small cloud instances.
+    """
+    torch = _get_torch()
+    _, _, height, width = input_tensor.shape
+    if height <= REDCNN_TILE_SIZE and width <= REDCNN_TILE_SIZE:
+        return model(input_tensor)
+
+    step = REDCNN_TILE_SIZE - REDCNN_TILE_OVERLAP
+    output = torch.zeros_like(input_tensor)
+    weights = torch.zeros_like(input_tensor)
+
+    for top in _tile_starts(height, REDCNN_TILE_SIZE, step):
+        for left in _tile_starts(width, REDCNN_TILE_SIZE, step):
+            bottom = min(top + REDCNN_TILE_SIZE, height)
+            right = min(left + REDCNN_TILE_SIZE, width)
+            patch = input_tensor[:, :, top:bottom, left:right]
+            patch_h = bottom - top
+            patch_w = right - left
+
+            if patch_h < MIN_REDCNN_SIZE or patch_w < MIN_REDCNN_SIZE:
+                padded_h = max(patch_h, MIN_REDCNN_SIZE)
+                padded_w = max(patch_w, MIN_REDCNN_SIZE)
+                padded = torch.zeros(
+                    (1, 1, padded_h, padded_w),
+                    dtype=input_tensor.dtype,
+                    device=input_tensor.device,
+                )
+                padded[:, :, :patch_h, :patch_w] = patch
+                patch = padded
+
+            pred = model(patch)[:, :, :patch_h, :patch_w]
+            output[:, :, top:bottom, left:right] += pred
+            weights[:, :, top:bottom, left:right] += 1
+
+    return output / weights.clamp_min(1)
+
+
 def _run_redcnn(image: Image.Image, task: ReconstructionTask) -> Image.Image:
     torch = _get_torch()
     model = load_model_for_task(task)
     input_tensor, original_size = _pil_to_redcnn_tensor(image)
 
     with torch.inference_mode():
-        output = model(input_tensor)
+        output = _run_redcnn_tensor(input_tensor, model)
 
     return _redcnn_tensor_to_pil(output, original_size)
 
@@ -176,7 +231,7 @@ def _run_redcnn_from_normalized_npy(image_array: np.ndarray, task: Reconstructio
     input_tensor, original_size = _npy_to_redcnn_tensor(image_array)
 
     with torch.inference_mode():
-        output = model(input_tensor)
+        output = _run_redcnn_tensor(input_tensor, model)
 
     return _redcnn_normalized_tensor_to_windowed_pil(output, original_size)
 
